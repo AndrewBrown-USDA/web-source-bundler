@@ -5,11 +5,11 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
-from source_bundler.models import CaptureConfig, SourceError, ViewportConfig
-
-DEFAULT_USER_AGENT = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 SourceBundler/0.1.0"
+from source_bundler.models import (
+    DEFAULT_USER_AGENT,
+    CaptureConfig,
+    SourceError,
+    ViewportConfig,
 )
 
 
@@ -84,6 +84,7 @@ async def capture_url(
                     "user_agent": config.user_agent,
                     "java_script_enabled": True,
                     "ignore_https_errors": True,
+                    "accept_downloads": False,
                 }
 
                 # Try to block service workers via context options if supported

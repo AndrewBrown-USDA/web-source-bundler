@@ -4,6 +4,11 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
+DEFAULT_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 SourceBundler/0.1.0"
+)
+
 
 class ViewportConfig(BaseModel):
     """Viewport dimensions for browser rendering."""
@@ -16,10 +21,7 @@ class CaptureConfig(BaseModel):
     viewport: ViewportConfig = Field(default_factory=ViewportConfig)
     locale: str = "en-US"
     timezone: str = "UTC"
-    user_agent: str = (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    )
+    user_agent: str = DEFAULT_USER_AGENT
     timeout_seconds: int = 30
 
 
