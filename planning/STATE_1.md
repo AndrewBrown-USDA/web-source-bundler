@@ -15,9 +15,9 @@
 - [x] `T1.2-utils-and-hashing` (done) — Sanitization, timestamp utilities, SHA-256 hashing
 
 ### Wave 2
-- [ ] `T2.1-selection-and-inputs` (pending) — Input parsing, interactive selection, deduplication
-- [ ] `T2.2-extract-and-ast` (pending) — HTML content cleaning, readability, block-level AST
-- [ ] `T2.3-markdown-and-redact` (pending) — Front matter, readable.md, combined.md, redaction, links table
+- [x] `T2.1-selection-and-inputs` (done) — Input parsing, interactive selection, deduplication
+- [x] `T2.2-extract-and-ast` (done) — HTML content cleaning, readability, block-level AST
+- [x] `T2.3-markdown-and-redact` (done) — Front matter, readable.md, combined.md, redaction, links table
 
 ### Wave 3
 - [ ] `T3.1-playwright-capture` (pending) — Headless Chromium capture, screenshot, PDF, headers
@@ -42,4 +42,23 @@
 - Files: `source_bundler/utils.py`, `source_bundler/hashing.py`, `tests/test_utils.py`, `tests/test_hashing.py`
 - Test: `python -m pytest tests/test_utils.py tests/test_hashing.py -v` -> 21 passed
 - Deviations: none
+
+### T2.1-selection-and-inputs
+- Status: completed
+- Files: `source_bundler/selection.py`, `tests/test_selection.py`
+- Test: `python -m pytest tests/test_selection.py -v` -> 7 passed
+- Deviations: none
+
+### T2.2-extract-and-ast
+- Status: completed
+- Files: `source_bundler/extract.py`, `tests/test_extract.py`
+- Test: `python -m pytest tests/test_extract.py -v` -> 10 passed
+- Deviations: none
+
+### T2.3-markdown-and-redact
+- Status: completed
+- Files: `source_bundler/markdown.py`, `tests/test_markdown.py`
+- Test: `python -m pytest tests/test_markdown.py -v` -> 10 passed
+- Deviations: none
+
 
