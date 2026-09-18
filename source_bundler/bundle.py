@@ -6,9 +6,11 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from bs4 import BeautifulSoup
 
+from source_bundler.capture import CaptureResult
 from source_bundler.extract import build_ast_document, extract_readable_html
 from source_bundler.hashing import generate_checksums_content, hash_file
 from source_bundler.markdown import (
+    ReadableSourceContext,
     build_combined_markdown,
     build_readable_markdown,
     html_to_markdown,
@@ -55,34 +57,56 @@ class BundlePackager:
         self.out_dir.mkdir(parents=True, exist_ok=True)
         (self.out_dir / "sources").mkdir(parents=True, exist_ok=True)
 
-    def _get_val(self, obj: Any, key: str, default: Any = None) -> Any:
-        """Safely get an attribute or dictionary key from capture result."""
-        if isinstance(obj, dict):
-            return obj.get(key, default)
-        return getattr(obj, key, default)
-
-    def add_source(
+    def _extract_capture_data(
         self,
-        source_id: str,
-        input_url: str,
-        capture_result: Any,
-        selected: bool = True,
-        selection_note: Optional[str] = None,
-    ) -> SourceRecord:
-        """Process capture result for a source and write its artifacts and metadata."""
-        source_dir = self.out_dir / "sources" / source_id
-        source_dir.mkdir(parents=True, exist_ok=True)
-
-        final_url = self._get_val(capture_result, "final_url", input_url) or input_url
-        title = self._get_val(capture_result, "title")
-        http_status = self._get_val(capture_result, "http_status")
-        content_type = self._get_val(capture_result, "content_type")
-        rendered_html = self._get_val(capture_result, "rendered_html")
-        raw_html = self._get_val(capture_result, "raw_html")
-        screenshot_bytes = self._get_val(capture_result, "screenshot_bytes")
-        pdf_bytes = self._get_val(capture_result, "pdf_bytes")
-        response_headers = self._get_val(capture_result, "response_headers")
-        raw_errors = self._get_val(capture_result, "errors", [])
+        capture_result: Union[CaptureResult, Dict[str, Any], Any],
+        default_url: str,
+    ) -> Tuple[
+        str,
+        Optional[str],
+        Optional[int],
+        Optional[str],
+        Optional[str],
+        Optional[str],
+        Optional[bytes],
+        Optional[bytes],
+        Optional[Dict[str, str]],
+        List[SourceError],
+    ]:
+        """Extract typed fields from CaptureResult, dict, or duck-typed object."""
+        if isinstance(capture_result, CaptureResult):
+            final_url = capture_result.final_url or default_url
+            title = capture_result.title
+            http_status = capture_result.http_status
+            content_type = capture_result.content_type
+            rendered_html = capture_result.rendered_html
+            raw_html = capture_result.raw_html
+            screenshot_bytes = capture_result.screenshot_bytes
+            pdf_bytes = capture_result.pdf_bytes
+            response_headers = capture_result.response_headers
+            raw_errors = capture_result.errors
+        elif isinstance(capture_result, dict):
+            final_url = capture_result.get("final_url") or default_url
+            title = capture_result.get("title")
+            http_status = capture_result.get("http_status")
+            content_type = capture_result.get("content_type")
+            rendered_html = capture_result.get("rendered_html")
+            raw_html = capture_result.get("raw_html")
+            screenshot_bytes = capture_result.get("screenshot_bytes")
+            pdf_bytes = capture_result.get("pdf_bytes")
+            response_headers = capture_result.get("response_headers")
+            raw_errors = capture_result.get("errors", [])
+        else:
+            final_url = getattr(capture_result, "final_url", default_url) or default_url
+            title = getattr(capture_result, "title", None)
+            http_status = getattr(capture_result, "http_status", None)
+            content_type = getattr(capture_result, "content_type", None)
+            rendered_html = getattr(capture_result, "rendered_html", None)
+            raw_html = getattr(capture_result, "raw_html", None)
+            screenshot_bytes = getattr(capture_result, "screenshot_bytes", None)
+            pdf_bytes = getattr(capture_result, "pdf_bytes", None)
+            response_headers = getattr(capture_result, "response_headers", None)
+            raw_errors = getattr(capture_result, "errors", [])
 
         # Normalize errors into List[SourceError]
         errors: List[SourceError] = []
@@ -99,6 +123,44 @@ class BundlePackager:
                         timestamp=datetime.now(timezone.utc),
                     )
                 )
+
+        return (
+            final_url,
+            title,
+            http_status,
+            content_type,
+            rendered_html,
+            raw_html,
+            screenshot_bytes,
+            pdf_bytes,
+            response_headers,
+            errors,
+        )
+
+    def add_source(
+        self,
+        source_id: str,
+        input_url: str,
+        capture_result: Union[CaptureResult, Dict[str, Any], Any],
+        selected: bool = True,
+        selection_note: Optional[str] = None,
+    ) -> SourceRecord:
+        """Process capture result for a source and write its artifacts and metadata."""
+        source_dir = self.out_dir / "sources" / source_id
+        source_dir.mkdir(parents=True, exist_ok=True)
+
+        (
+            final_url,
+            title,
+            http_status,
+            content_type,
+            rendered_html,
+            raw_html,
+            screenshot_bytes,
+            pdf_bytes,
+            response_headers,
+            errors,
+        ) = self._extract_capture_data(capture_result, default_url=input_url)
 
         artifacts = ArtifactRefs()
         hashes: Dict[str, str] = {}
@@ -145,7 +207,7 @@ class BundlePackager:
                             extracted_links.append((link_text, href))
 
                 fetched_at_str = format_utc_timestamp(datetime.now(timezone.utc))
-                readable_md_content = build_readable_markdown(
+                readable_context = ReadableSourceContext(
                     source_id=source_id,
                     title=title or "",
                     input_url=input_url,
@@ -157,6 +219,7 @@ class BundlePackager:
                     include_links_table=self.include_links_table,
                     redact_patterns=self.redact_patterns,
                 )
+                readable_md_content = build_readable_markdown(context=readable_context)
                 readable_path = source_dir / "readable.md"
                 readable_path.write_text(readable_md_content, encoding="utf-8")
                 rel_readable = f"sources/{source_id}/readable.md"

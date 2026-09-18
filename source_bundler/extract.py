@@ -69,6 +69,21 @@ def _strip_unwanted_elements(soup: BeautifulSoup) -> None:
             tag.decompose()
 
 
+def _extract_page_title(soup: BeautifulSoup) -> str:
+    """Extract page title from BeautifulSoup tree checking title tag and h1 tag."""
+    title_tag = soup.find("title")
+    if title_tag and title_tag.string:
+        clean = title_tag.string.strip()
+        if clean:
+            return clean
+    h1 = soup.find("h1")
+    if h1:
+        clean = h1.get_text().strip()
+        if clean:
+            return clean
+    return ""
+
+
 def extract_readable_html(raw_html: str, url: Optional[str] = None) -> Tuple[str, str]:
     """Extract page title and main readable HTML content, stripping boilerplate and unwanted tags.
     
@@ -97,11 +112,7 @@ def extract_readable_html(raw_html: str, url: Optional[str] = None) -> Tuple[str
     if not content_html or not content_html.strip():
         soup = BeautifulSoup(raw_html, "html.parser")
         if not title:
-            title_tag = soup.find("title")
-            if title_tag and title_tag.string:
-                title = title_tag.string.strip()
-            elif soup.find("h1"):
-                title = soup.find("h1").get_text().strip()
+            title = _extract_page_title(soup)
 
         # Target main content containers
         main_content = (
@@ -119,9 +130,7 @@ def extract_readable_html(raw_html: str, url: Optional[str] = None) -> Tuple[str
 
     # If title is still missing, try extracting from clean soup
     if not title:
-        h1 = clean_soup.find("h1")
-        if h1:
-            title = h1.get_text().strip()
+        title = _extract_page_title(clean_soup)
 
     # Normalize returned html
     body = clean_soup.body if clean_soup.body else clean_soup
@@ -137,6 +146,141 @@ def _extract_text(element: Tag) -> str:
     return " ".join(element.get_text().split()).strip()
 
 
+def _ast_heading(el: Tag, tag_name: str) -> Optional[ASTBlock]:
+    """Convert heading tag to ASTBlock."""
+    level = int(tag_name[1])
+    text = _extract_text(el)
+    if text:
+        return ASTBlock(type="heading", level=level, text=text)
+    return None
+
+
+def _ast_paragraph(el: Tag) -> Optional[ASTBlock]:
+    """Convert paragraph tag to ASTBlock."""
+    text = _extract_text(el)
+    if text:
+        return ASTBlock(type="paragraph", text=text)
+    return None
+
+
+def _ast_list(el: Tag, tag_name: str) -> Optional[ASTBlock]:
+    """Convert ul or ol list tag to ASTBlock."""
+    is_ordered = tag_name == "ol"
+    items: List[str] = []
+    for li in el.find_all("li", recursive=False):
+        item_text = _extract_text(li)
+        if item_text:
+            items.append(item_text)
+    # If no direct children found (e.g. malformed markup), find all descendant li
+    if not items:
+        for li in el.find_all("li"):
+            item_text = _extract_text(li)
+            if item_text:
+                items.append(item_text)
+    if items:
+        return ASTBlock(
+            type="list",
+            items=items,
+            extra={"ordered": is_ordered},
+        )
+    return None
+
+
+def _ast_blockquote(el: Tag) -> Optional[ASTBlock]:
+    """Convert blockquote tag to ASTBlock."""
+    text = _extract_text(el)
+    if text:
+        return ASTBlock(type="blockquote", text=text)
+    return None
+
+
+def _ast_code_block(el: Tag) -> Optional[ASTBlock]:
+    """Convert pre tag to code_block ASTBlock."""
+    code_el = el.find("code")
+    code_text = el.get_text()
+    language = None
+    if code_el:
+        classes = code_el.get("class", [])
+        if isinstance(classes, list):
+            for cls in classes:
+                if cls.startswith("language-") or cls.startswith("lang-"):
+                    language = cls.split("-", 1)[1]
+                    break
+
+    return ASTBlock(
+        type="code_block",
+        text=code_text.strip("\r\n"),
+        extra={"language": language} if language else {},
+    )
+
+
+def _ast_table(el: Tag) -> Optional[ASTBlock]:
+    """Convert table tag to ASTBlock."""
+    rows: List[List[str]] = []
+    headers: List[str] = []
+
+    # Look for headers
+    th_cells = el.find_all("th")
+    if th_cells:
+        headers = [_extract_text(th) for th in th_cells]
+
+    # Collect all tr elements
+    for tr in el.find_all("tr"):
+        cells = tr.find_all(["td", "th"])
+        row_data = [_extract_text(cell) for cell in cells]
+        if any(row_data):
+            rows.append(row_data)
+
+    if rows or headers:
+        extra_data: Dict[str, Any] = {}
+        if headers:
+            extra_data["headers"] = headers
+        return ASTBlock(
+            type="table",
+            rows=rows,
+            extra=extra_data,
+        )
+    return None
+
+
+def _ast_link(el: Tag, parent_tags: List[str]) -> Optional[ASTBlock]:
+    """Convert standalone link tag to ASTBlock."""
+    ignored_parents = {"p", "li", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6", "table", "td", "th"}
+    if not any(pt in ignored_parents for pt in parent_tags):
+        href = el.get("href")
+        text = _extract_text(el)
+        if href or text:
+            return ASTBlock(type="link", text=text or None, href=href or None)
+    return None
+
+
+def _ast_for_tag(el: Tag, parent_tags: List[str]) -> Optional[ASTBlock]:
+    """Convert a BeautifulSoup tag element into an ASTBlock if applicable."""
+    tag_name = el.name.lower()
+    ignored_parents = {"ul", "ol", "li", "blockquote", "pre", "table", "thead", "tbody", "tr", "th", "td"}
+    is_nested_in_container = any(pt in ignored_parents for pt in parent_tags)
+
+    if is_nested_in_container and tag_name != "a":
+        return None
+
+    if tag_name in ("h1", "h2", "h3", "h4", "h5", "h6"):
+        return _ast_heading(el, tag_name)
+    elif tag_name == "p":
+        return _ast_paragraph(el)
+    elif tag_name in ("ul", "ol"):
+        return _ast_list(el, tag_name)
+    elif tag_name == "blockquote":
+        return _ast_blockquote(el)
+    elif tag_name == "pre":
+        return _ast_code_block(el)
+    elif tag_name == "table":
+        return _ast_table(el)
+    elif tag_name == "a":
+        return _ast_link(el, parent_tags)
+
+    return None
+
+
 def build_ast_document(source_id: str, title: str, final_url: str, cleaned_html: str) -> ASTDocument:
     """Parse cleaned HTML into a structured block-level ASTDocument representation."""
     if not cleaned_html or not cleaned_html.strip():
@@ -150,115 +294,12 @@ def build_ast_document(source_id: str, title: str, final_url: str, cleaned_html:
 
     # We collect block-level candidates from the cleaned HTML
     elements = soup.find_all(target_tags)
-    
-    # Track visited / nested elements to avoid duplicate sub-block extraction
-    # (e.g. avoid parsing <p> or <a> inside <li> or inside <blockquote> or inside <table>)
-    ignored_parents = {"ul", "ol", "li", "blockquote", "pre", "table", "thead", "tbody", "tr", "th", "td"}
 
     for el in elements:
-        # Check if this element is nested inside another block container already being handled
         parent_tags = [p.name.lower() for p in el.parents if isinstance(p, Tag)]
-        is_nested_in_container = any(pt in ignored_parents for pt in parent_tags)
-        
-        tag_name = el.name.lower()
-
-        if is_nested_in_container and tag_name != "a":
-            continue
-
-        if tag_name in ("h1", "h2", "h3", "h4", "h5", "h6"):
-            level = int(tag_name[1])
-            text = _extract_text(el)
-            if text:
-                blocks.append(ASTBlock(type="heading", level=level, text=text))
-
-        elif tag_name == "p":
-            text = _extract_text(el)
-            if text:
-                blocks.append(ASTBlock(type="paragraph", text=text))
-
-        elif tag_name in ("ul", "ol"):
-            is_ordered = tag_name == "ol"
-            items = []
-            for li in el.find_all("li", recursive=False):
-                item_text = _extract_text(li)
-                if item_text:
-                    items.append(item_text)
-            # If no direct children found (e.g. malformed markup), find all descendant li
-            if not items:
-                for li in el.find_all("li"):
-                    item_text = _extract_text(li)
-                    if item_text:
-                        items.append(item_text)
-            if items:
-                blocks.append(
-                    ASTBlock(
-                        type="list",
-                        items=items,
-                        extra={"ordered": is_ordered},
-                    )
-                )
-
-        elif tag_name == "blockquote":
-            text = _extract_text(el)
-            if text:
-                blocks.append(ASTBlock(type="blockquote", text=text))
-
-        elif tag_name == "pre":
-            code_el = el.find("code")
-            code_text = el.get_text()
-            language = None
-            if code_el:
-                # Check for language classes (e.g., class="language-python" or class="lang-py")
-                classes = code_el.get("class", [])
-                if isinstance(classes, list):
-                    for cls in classes:
-                        if cls.startswith("language-") or cls.startswith("lang-"):
-                            language = cls.split("-", 1)[1]
-                            break
-
-            blocks.append(
-                ASTBlock(
-                    type="code_block",
-                    text=code_text.strip("\r\n"),
-                    extra={"language": language} if language else {},
-                )
-            )
-
-        elif tag_name == "table":
-            rows: List[List[str]] = []
-            headers: List[str] = []
-            
-            # Look for headers
-            th_cells = el.find_all("th")
-            if th_cells:
-                headers = [_extract_text(th) for th in th_cells]
-
-            # Collect all tr elements
-            for tr in el.find_all("tr"):
-                cells = tr.find_all(["td", "th"])
-                row_data = [_extract_text(cell) for cell in cells]
-                if any(row_data):
-                    rows.append(row_data)
-
-            if rows or headers:
-                extra_data: Dict[str, Any] = {}
-                if headers:
-                    extra_data["headers"] = headers
-                blocks.append(
-                    ASTBlock(
-                        type="table",
-                        rows=rows,
-                        extra=extra_data,
-                    )
-                )
-
-        elif tag_name == "a":
-            # Only record standalone or top-level links (not nested in p, li, etc.)
-            if not any(pt in ("p", "li", "blockquote", "h1", "h2", "h3", "h4", "h5", "h6", "table", "td", "th") for pt in parent_tags):
-                href = el.get("href")
-                text = _extract_text(el)
-                if href or text:
-                    blocks.append(ASTBlock(type="link", text=text or None, href=href or None))
+        block = _ast_for_tag(el, parent_tags)
+        if block is not None:
+            blocks.append(block)
 
     return ASTDocument(
         source_id=source_id,
