@@ -230,8 +230,7 @@ def test_finalize_bundle(tmp_path: Path) -> None:
     assert combined_path.is_file()
     combined_md = combined_path.read_text(encoding="utf-8")
     assert "# Source Bundle" in combined_md
-    assert f"- **Bundle ID:** {packager.bundle_id}" in combined_md
-    assert "## Index" in combined_md
+    assert f"Bundle ID: {packager.bundle_id}" in combined_md
     assert "## Source 001: Page One" in combined_md
     assert "## Source 002: Page Two" in combined_md
 

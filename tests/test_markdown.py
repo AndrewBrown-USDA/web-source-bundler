@@ -179,20 +179,19 @@ def test_build_combined_markdown_complete():
         "001": "# First Source\n\nThis is the markdown body of source 1.",
     }
 
-    combined = build_combined_markdown(manifest, source_markdowns)
+    combined = build_combined_markdown(manifest, source_markdowns, include_index=True)
 
     assert "# Source Bundle" in combined
-    assert "source-bundle-20260918T120000Z" in combined
-    assert "source-bundler v0.1.0" in combined
-    assert "## Usage" in combined
+    assert "Bundle ID: source-bundle-20260918T120000Z" in combined
+    assert "Tool: source-bundler 0.1.0" in combined
     assert "Cite material by source ID." in combined
     assert "## Index" in combined
     assert "| 001 | First Source | HTTP 200 | abc123sha |" in combined
     assert "| 002 | Failed Source | Error (fetch) | - |" in combined
 
     assert "## Source 001: First Source" in combined
-    assert "- **Input URL:** https://example.com/1" in combined
-    assert "- **SHA-256 readable Markdown:** abc123sha" in combined
+    assert "- Input URL: https://example.com/1" in combined
+    assert "- SHA-256 readable Markdown: abc123sha" in combined
     assert "This is the markdown body of source 1." in combined
 
     assert "## Source 002: Failed Source" in combined
