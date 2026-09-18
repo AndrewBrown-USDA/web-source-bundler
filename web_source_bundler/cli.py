@@ -1,4 +1,4 @@
-"""Command line interface for source-bundler."""
+"""Command line interface for web-source-bundler."""
 
 from pathlib import Path
 from typing import List, Optional
@@ -6,11 +6,11 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from source_bundler import __version__
-from source_bundler.bundle import BundlePackager
-from source_bundler.capture import CaptureResult, run_capture
-from source_bundler.models import CaptureConfig, SearchResultItem
-from source_bundler.selection import (
+from web_source_bundler import __version__
+from web_source_bundler.bundle import BundlePackager
+from web_source_bundler.capture import CaptureResult, run_capture
+from web_source_bundler.models import CaptureConfig, SearchResultItem
+from web_source_bundler.selection import (
     deduplicate_items,
     parse_search_json,
     parse_url_file,
@@ -18,7 +18,7 @@ from source_bundler.selection import (
 )
 
 app = typer.Typer(
-    name="source-bundler",
+    name="web-source-bundler",
     help="Deterministic web source capture and AI-assisted research packaging tool.",
     no_args_is_help=True,
 )
@@ -28,7 +28,7 @@ console = Console()
 def version_callback(value: bool):
     """Print tool version and exit."""
     if value:
-        console.print(f"source-bundler version {__version__}")
+        console.print(f"web-source-bundler version {__version__}")
         raise typer.Exit()
 
 
@@ -43,7 +43,7 @@ def main(
         is_eager=True,
     ),
 ):
-    """source-bundler top-level CLI callback."""
+    """web-source-bundler top-level CLI callback."""
     pass
 
 

@@ -4,14 +4,14 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
-from source_bundler.capture import (
+from web_source_bundler.capture import (
     DEFAULT_USER_AGENT,
     CaptureResult,
     _get_default_config,
     capture_url,
     run_capture,
 )
-from source_bundler.models import CaptureConfig, SourceError, ViewportConfig
+from web_source_bundler.models import CaptureConfig, SourceError, ViewportConfig
 
 
 def test_capture_result_defaults():

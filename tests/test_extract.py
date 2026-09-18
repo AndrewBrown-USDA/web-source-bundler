@@ -1,8 +1,8 @@
 """Unit tests for HTML extraction, sanitization, and AST generation."""
 
 import pytest
-from source_bundler.extract import extract_readable_html, build_ast_document
-from source_bundler.models import ASTDocument, ASTBlock
+from web_source_bundler.extract import extract_readable_html, build_ast_document
+from web_source_bundler.models import ASTDocument, ASTBlock
 
 
 def test_extract_readable_html_basic():

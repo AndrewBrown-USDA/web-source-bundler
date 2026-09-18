@@ -1,14 +1,14 @@
-"""Unit tests for source-bundler CLI interface."""
+"""Unit tests for web-source-bundler CLI interface."""
 
 import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 from typer.testing import CliRunner
 
-from source_bundler import __version__
-from source_bundler.capture import CaptureResult
-from source_bundler.cli import app
-from source_bundler.models import SourceError
+from web_source_bundler import __version__
+from web_source_bundler.capture import CaptureResult
+from web_source_bundler.cli import app
+from web_source_bundler.models import SourceError
 
 runner = CliRunner()
 
@@ -32,7 +32,7 @@ def test_cli_version():
     """Verify --version flag outputs version and exits 0."""
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert f"source-bundler version {__version__}" in result.output
+    assert f"web-source-bundler version {__version__}" in result.output
 
 
 def test_cli_help():
@@ -44,7 +44,7 @@ def test_cli_help():
     assert "search-results" in result.output
 
 
-@patch("source_bundler.cli.run_capture")
+@patch("web_source_bundler.cli.run_capture")
 def test_cli_urls_single_success(mock_run_capture, tmp_path: Path):
     """Test capturing a single URL from CLI."""
     mock_run_capture.return_value = _dummy_capture_result("https://example.com/page1")
@@ -71,7 +71,7 @@ def test_cli_urls_single_success(mock_run_capture, tmp_path: Path):
     assert "001" in result.output
 
 
-@patch("source_bundler.cli.run_capture")
+@patch("web_source_bundler.cli.run_capture")
 def test_cli_urls_multiple_deduplicated(mock_run_capture, tmp_path: Path):
     """Test capturing multiple URLs with duplicate normalization."""
     mock_run_capture.return_value = _dummy_capture_result("https://example.com/page1")
@@ -97,7 +97,7 @@ def test_cli_urls_multiple_deduplicated(mock_run_capture, tmp_path: Path):
     assert not (out_dir / "sources" / "003").exists()
 
 
-@patch("source_bundler.cli.run_capture")
+@patch("web_source_bundler.cli.run_capture")
 def test_cli_file_command(mock_run_capture, tmp_path: Path):
     """Test the 'file' command with a text file input."""
     mock_run_capture.return_value = _dummy_capture_result("https://example.com/file-target")
@@ -121,7 +121,7 @@ def test_cli_file_command(mock_run_capture, tmp_path: Path):
     assert (out_dir / "manifest.json").exists()
 
 
-@patch("source_bundler.cli.run_capture")
+@patch("web_source_bundler.cli.run_capture")
 def test_cli_search_results_command(mock_run_capture, tmp_path: Path):
     """Test the 'search-results' command with a JSON file input."""
     mock_run_capture.return_value = _dummy_capture_result("https://example.com/search-hit")
@@ -156,11 +156,11 @@ def test_cli_search_results_command(mock_run_capture, tmp_path: Path):
     assert (out_dir / "manifest.json").exists()
 
 
-@patch("source_bundler.cli.select_sources_interactively")
-@patch("source_bundler.cli.run_capture")
+@patch("web_source_bundler.cli.select_sources_interactively")
+@patch("web_source_bundler.cli.run_capture")
 def test_cli_interactive_filtering(mock_run_capture, mock_interactive, tmp_path: Path):
     """Test interactive selection where user includes one source and excludes another."""
-    from source_bundler.models import SearchResultItem
+    from web_source_bundler.models import SearchResultItem
 
     mock_run_capture.return_value = _dummy_capture_result("https://example.com/kept")
     item1 = SearchResultItem(url="https://example.com/kept", title="Kept")
@@ -201,7 +201,7 @@ def test_cli_interactive_filtering(mock_run_capture, mock_interactive, tmp_path:
     assert manifest_data["sources"][1]["selection_note"] == "Excluded by user during interactive selection"
 
 
-@patch("source_bundler.cli.run_capture")
+@patch("web_source_bundler.cli.run_capture")
 def test_cli_capture_with_errors(mock_run_capture, tmp_path: Path):
     """Test handling of capture warnings/errors in CLI output and summary table."""
     from datetime import datetime, timezone

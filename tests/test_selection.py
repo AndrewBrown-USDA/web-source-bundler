@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 import pytest
 
-from source_bundler.models import SearchResultItem
-from source_bundler.selection import (
+from web_source_bundler.models import SearchResultItem
+from web_source_bundler.selection import (
     deduplicate_items,
     parse_search_json,
     parse_url_file,

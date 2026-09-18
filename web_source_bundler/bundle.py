@@ -6,16 +6,16 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 from bs4 import BeautifulSoup
 
-from source_bundler.capture import CaptureResult
-from source_bundler.extract import build_ast_document, extract_readable_html
-from source_bundler.hashing import generate_checksums_content, hash_file
-from source_bundler.markdown import (
+from web_source_bundler.capture import CaptureResult
+from web_source_bundler.extract import build_ast_document, extract_readable_html
+from web_source_bundler.hashing import generate_checksums_content, hash_file
+from web_source_bundler.markdown import (
     ReadableSourceContext,
     build_combined_markdown,
     build_readable_markdown,
     html_to_markdown,
 )
-from source_bundler.models import (
+from web_source_bundler.models import (
     ArtifactRefs,
     CaptureConfig,
     Manifest,
@@ -23,7 +23,7 @@ from source_bundler.models import (
     SourceRecord,
     ToolInfo,
 )
-from source_bundler.utils import format_utc_timestamp, generate_bundle_id
+from web_source_bundler.utils import format_utc_timestamp, generate_bundle_id
 
 
 class BundlePackager:

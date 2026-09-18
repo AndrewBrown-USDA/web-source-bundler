@@ -1,6 +1,6 @@
-# source-bundler
+# web-source-bundler
 
-**`source-bundler`** is a local Python command-line utility designed to capture web sources deterministically for AI-assisted research workflows. It extracts clean, readable Markdown content from web pages, renders full-page screenshots and PDF printouts, constructs lightweight block-level ASTs, and packages everything into an upload-ready source bundle complete with audit-ready provenance metadata and cryptographic SHA-256 checksums.
+**`web-source-bundler`** is a local Python command-line utility designed to capture web sources deterministically for AI-assisted research workflows. It extracts clean, readable Markdown content from web pages, renders full-page screenshots and PDF printouts, constructs lightweight block-level ASTs, and packages everything into an upload-ready source bundle complete with audit-ready provenance metadata and cryptographic SHA-256 checksums.
 
 ---
 
@@ -22,10 +22,10 @@
 
 Ensure you have Python 3.9+ installed.
 
-1. Clone the repository and install `source-bundler` in editable mode:
+1. Clone the repository and install `web-source-bundler` in editable mode:
    ```bash
-   git clone https://github.com/example/source-bundler.git
-   cd source-bundler
+   git clone https://github.com/example/web-source-bundler.git
+   cd web-source-bundler
    pip install -e .
    ```
 
@@ -38,14 +38,14 @@ Ensure you have Python 3.9+ installed.
 
 ## CLI Commands & Usage
 
-`source-bundler` provides three primary subcommands to bundle web content: `urls`, `file`, and `search-results`.
+`web-source-bundler` provides three primary subcommands to bundle web content: `urls`, `file`, and `search-results`. (Both `web-source-bundler` and `source-bundler` command aliases are available).
 
 ### 1. Direct URLs
 
 Capture one or more URLs directly from command-line arguments:
 
 ```bash
-source-bundler urls https://example.com https://www.gsa.gov --out ./bundle
+web-source-bundler urls https://example.com https://www.gsa.gov --out ./bundle
 ```
 
 ### 2. URL List File
@@ -53,7 +53,7 @@ source-bundler urls https://example.com https://www.gsa.gov --out ./bundle
 Capture URLs listed in a plain text file (one URL per line; blank lines and lines starting with `#` are ignored):
 
 ```bash
-source-bundler file urls.txt --out ./bundle
+web-source-bundler file urls.txt --out ./bundle
 ```
 
 *Example `urls.txt`:*
@@ -69,7 +69,7 @@ https://docs.python.org/3/
 Capture sources from a search results JSON file:
 
 ```bash
-source-bundler search-results results.json --out ./bundle --interactive
+web-source-bundler search-results results.json --out ./bundle --interactive
 ```
 
 *Example `results.json`:*
@@ -110,7 +110,7 @@ All subcommands support common configuration flags:
 ### Example with Advanced Flags
 
 ```bash
-source-bundler urls https://example.com \
+web-source-bundler urls https://example.com \
   --out ./my-research-bundle \
   --no-pdf \
   --include-links-table \
@@ -122,7 +122,7 @@ source-bundler urls https://example.com \
 
 ## Output Directory & Artifact Structure
 
-When execution completes, `source-bundler` creates a self-contained bundle directory containing consolidated research files, checksums, and per-source archival artifacts:
+When execution completes, `web-source-bundler` creates a self-contained bundle directory containing consolidated research files, checksums, and per-source archival artifacts:
 
 ```text
 source-bundle-20260918T153000Z/
@@ -152,7 +152,7 @@ The `combined.md` file is tailored specifically for LLM context windows, providi
 
 Bundle ID: source-bundle-20260918T153000Z
 Created: 2026-09-18T15:30:00Z
-Tool: source-bundler 0.1.0
+Tool: web-source-bundler 0.1.0
 
 Use this document as the reference source bundle. Cite material by source ID.
 
@@ -176,7 +176,7 @@ This domain is for use in illustrative examples in documents. You may use this d
 
 ## Content Extraction Pipeline & Tradeoffs
 
-`source-bundler` implements a pragmatic, robust content extraction pipeline designed to maximize text fidelity while stripping distracting web clutter:
+`web-source-bundler` implements a pragmatic, robust content extraction pipeline designed to maximize text fidelity while stripping distracting web clutter:
 
 1. **DOM Capture**: Playwright loads the page, waits for `domcontentloaded` and network idle stabilization, and retrieves the live DOM HTML (`page.content()`).
 2. **Boilerplate & Noise Removal**: Non-content elements are removed (`<script>`, `<style>`, `<noscript>`, `<svg>`, `<canvas>`, `<nav>`, `<footer>`, `<header>`, cookie banners, and dialog elements).
@@ -186,14 +186,14 @@ This domain is for use in illustrative examples in documents. You may use this d
 6. **Redaction & Link Indexing**: Optional regex redactions are applied across Markdown content, and an optional outbound links reference table can be appended.
 
 ### Tradeoffs
-- **Heuristic Content Isolation vs. Readability Engines**: Rather than relying strictly on heavy algorithmic readability models that may discard custom data tables or technical documentation sidebars, `source-bundler` combines semantic container heuristics with DOM hygiene to preserve complex structures like code blocks and tables.
+- **Heuristic Content Isolation vs. Readability Engines**: Rather than relying strictly on heavy algorithmic readability models that may discard custom data tables or technical documentation sidebars, `web-source-bundler` combines semantic container heuristics with DOM hygiene to preserve complex structures like code blocks and tables.
 - **Client-Side Rendering**: Headless Chromium execution ensures modern single-page applications (SPAs) render completely, at the cost of higher CPU/memory overhead compared to static HTTP requests.
 
 ---
 
 ## Provenance & Records Review
 
-`source-bundler` is designed to meet strict provenance and auditability standards for research reproducibility:
+`web-source-bundler` is designed to meet strict provenance and auditability standards for research reproducibility:
 
 - **Deterministic Browser Environment**:
   - Viewport: Fixed at `1365x768`
@@ -212,7 +212,7 @@ This domain is for use in illustrative examples in documents. You may use this d
 - **Untrusted Content Handling**: All fetched web assets are treated as untrusted data. DOM HTML is sanitized and converted to static Markdown before being passed to downstream AI workflows.
 - **No Credential Access**: The tool does not store, request, or transmit credentials, session tokens, or authentication cookies.
 - **No Automatic Remote Transmissions**: The tool is strictly a local capture and packaging utility. It does not perform automated uploads to any external AI service or third-party server.
-- **Ethical Web Ingestion**: `source-bundler` does not attempt to circumvent CAPTCHAs, paywalls, or access controls.
+- **Ethical Web Ingestion**: `web-source-bundler` does not attempt to circumvent CAPTCHAs, paywalls, or access controls.
 
 ---
 

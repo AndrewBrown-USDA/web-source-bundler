@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "source-bundler"
+name = "web-source-bundler"
 version = "0.1.0"
 description = "Deterministic local web source capture and packaging tool for AI workflows"
 requires-python = ">=3.10"
@@ -25,4 +25,5 @@ dev = [
 ]
 
 [project.scripts]
-source-bundler = "source_bundler.cli:app"
+web-source-bundler = "web_source_bundler.cli:app"
+source-bundler = "web_source_bundler.cli:app"

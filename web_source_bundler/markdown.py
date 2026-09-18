@@ -7,7 +7,7 @@ from typing import Dict, List, Optional, Tuple, Union
 from bs4 import BeautifulSoup
 from markdownify import markdownify as md
 
-from source_bundler.models import Manifest
+from web_source_bundler.models import Manifest
 
 
 @dataclass

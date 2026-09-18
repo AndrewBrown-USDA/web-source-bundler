@@ -1,9 +1,9 @@
-"""Unit tests for hashing utilities in source_bundler.hashing."""
+"""Unit tests for hashing utilities in web_source_bundler.hashing."""
 
 import hashlib
 from pathlib import Path
 import pytest
-from source_bundler.hashing import (
+from web_source_bundler.hashing import (
     hash_bytes,
     hash_string,
     hash_file,

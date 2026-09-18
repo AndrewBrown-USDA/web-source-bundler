@@ -1,4 +1,4 @@
-"""Unit tests for source_bundler.bundle.BundlePackager."""
+"""Unit tests for web_source_bundler.bundle.BundlePackager."""
 
 from dataclasses import dataclass, field
 import json
@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import Dict, List, Optional
 import pytest
 
-from source_bundler.bundle import BundlePackager
-from source_bundler.models import CaptureConfig, Manifest, SourceError, SourceRecord
+from web_source_bundler.bundle import BundlePackager
+from web_source_bundler.models import CaptureConfig, Manifest, SourceError, SourceRecord
 
 
 @dataclass

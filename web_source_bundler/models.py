@@ -1,4 +1,4 @@
-"""Core Pydantic models for source-bundler schemas and manifests."""
+"""Core Pydantic models for web-source-bundler schemas and manifests."""
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 SourceBundler/0.1.0"
+    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 WebSourceBundler/0.1.0"
 )
 
 
@@ -27,7 +27,7 @@ class CaptureConfig(BaseModel):
 
 class ToolInfo(BaseModel):
     """Tool metadata recording generator name and version."""
-    name: str = "source-bundler"
+    name: str = "web-source-bundler"
     version: str = "0.1.0"
 
 

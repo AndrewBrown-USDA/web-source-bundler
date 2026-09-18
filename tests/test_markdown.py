@@ -1,15 +1,15 @@
-"""Unit tests for source_bundler.markdown."""
+"""Unit tests for web_source_bundler.markdown."""
 
 from datetime import datetime, timezone
 import pytest
 
-from source_bundler.markdown import (
+from web_source_bundler.markdown import (
     apply_redactions,
     build_combined_markdown,
     build_readable_markdown,
     html_to_markdown,
 )
-from source_bundler.models import (
+from web_source_bundler.models import (
     ArtifactRefs,
     CaptureConfig,
     Manifest,
@@ -152,7 +152,7 @@ def test_build_combined_markdown_complete():
     manifest = Manifest(
         bundle_id="source-bundle-20260918T120000Z",
         created_at=now,
-        tool=ToolInfo(name="source-bundler", version="0.1.0"),
+        tool=ToolInfo(name="web-source-bundler", version="0.1.0"),
         capture_config=CaptureConfig(),
         sources=[
             SourceRecord(
@@ -183,7 +183,7 @@ def test_build_combined_markdown_complete():
 
     assert "# Source Bundle" in combined
     assert "Bundle ID: source-bundle-20260918T120000Z" in combined
-    assert "Tool: source-bundler 0.1.0" in combined
+    assert "Tool: web-source-bundler 0.1.0" in combined
     assert "Cite material by source ID." in combined
     assert "## Index" in combined
     assert "| 001 | First Source | HTTP 200 | abc123sha |" in combined

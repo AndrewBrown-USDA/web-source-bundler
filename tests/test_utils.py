@@ -1,8 +1,8 @@
-"""Unit tests for utility functions in source_bundler.utils."""
+"""Unit tests for utility functions in web_source_bundler.utils."""
 
 from datetime import datetime, timezone, timedelta
 import pytest
-from source_bundler.utils import (
+from web_source_bundler.utils import (
     sanitize_filename,
     format_utc_timestamp,
     generate_bundle_id,

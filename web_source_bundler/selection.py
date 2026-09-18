@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple, Union
 
-from source_bundler.models import SearchResultItem
-from source_bundler.utils import normalize_url
+from web_source_bundler.models import SearchResultItem
+from web_source_bundler.utils import normalize_url
 
 
 def parse_url_file(file_path: Union[str, Path]) -> List[SearchResultItem]:

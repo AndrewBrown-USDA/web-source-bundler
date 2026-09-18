@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import re
 from bs4 import BeautifulSoup, Comment, NavigableString, Tag
 
-from source_bundler.models import ASTBlock, ASTDocument
+from web_source_bundler.models import ASTBlock, ASTDocument
 
 try:
     from readability import Document  # readability-lxml
