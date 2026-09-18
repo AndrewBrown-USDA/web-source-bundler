@@ -24,7 +24,7 @@ Ensure you have Python 3.9+ installed.
 
 1. Clone the repository and install `web-source-bundler` in editable mode:
    ```bash
-   git clone https://github.com/example/web-source-bundler.git
+   git clone https://github.com/AndrewBrown-USDA/web-source-bundler.git
    cd web-source-bundler
    pip install -e .
    ```
