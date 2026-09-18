@@ -24,8 +24,8 @@
 - [x] `T3.2-bundle-packager` (done) — Bundle assembly, manifest writer, checksum generator
 
 ### Wave 4
-- [ ] `T4.1-cli-interface` (pending) — Typer CLI commands (`urls`, `file`, `search-results`), Rich UX
-- [ ] `T4.2-docs-and-validation` (pending) — README.md, end-to-end acceptance validation
+- [x] `T4.1-cli-interface` (done) — Typer CLI commands (`urls`, `file`, `search-results`), Rich UX
+- [x] `T4.2-docs-and-validation` (done) — README.md, end-to-end acceptance validation
 
 ---
 
@@ -72,6 +72,19 @@
 - Files: `source_bundler/bundle.py`, `tests/test_bundle.py`
 - Test: `python -m pytest tests/test_bundle.py -v` -> 7 passed
 - Deviations: none
+
+### T4.1-cli-interface
+- Status: completed
+- Files: `source_bundler/cli.py`, `tests/test_cli.py`
+- Test: `python -m pytest tests/test_cli.py -v` -> 8 passed
+- Deviations: none
+
+### T4.2-docs-and-validation
+- Status: completed
+- Files: `README.md`
+- Test: `python -m pytest -v` -> 70 passed
+- Deviations: none
+
 
 
 
