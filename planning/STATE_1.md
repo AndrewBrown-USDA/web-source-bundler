@@ -20,8 +20,8 @@
 - [x] `T2.3-markdown-and-redact` (done) — Front matter, readable.md, combined.md, redaction, links table
 
 ### Wave 3
-- [ ] `T3.1-playwright-capture` (pending) — Headless Chromium capture, screenshot, PDF, headers
-- [ ] `T3.2-bundle-packager` (pending) — Bundle assembly, manifest writer, checksum generator
+- [x] `T3.1-playwright-capture` (done) — Headless Chromium capture, screenshot, PDF, headers
+- [x] `T3.2-bundle-packager` (done) — Bundle assembly, manifest writer, checksum generator
 
 ### Wave 4
 - [ ] `T4.1-cli-interface` (pending) — Typer CLI commands (`urls`, `file`, `search-results`), Rich UX
@@ -60,5 +60,18 @@
 - Files: `source_bundler/markdown.py`, `tests/test_markdown.py`
 - Test: `python -m pytest tests/test_markdown.py -v` -> 10 passed
 - Deviations: none
+
+### T3.1-playwright-capture
+- Status: completed
+- Files: `source_bundler/capture.py`, `tests/test_capture.py`
+- Test: `python -m pytest tests/test_capture.py -v` -> 7 passed
+- Deviations: none
+
+### T3.2-bundle-packager
+- Status: completed
+- Files: `source_bundler/bundle.py`, `tests/test_bundle.py`
+- Test: `python -m pytest tests/test_bundle.py -v` -> 7 passed
+- Deviations: none
+
 
 
