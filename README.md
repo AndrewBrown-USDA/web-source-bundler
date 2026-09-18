@@ -1,48 +1,41 @@
 # web-source-bundler
 
-**`web-source-bundler`** is a local Python command-line utility designed to capture web sources deterministically for AI-assisted research workflows. It extracts clean, readable Markdown content from web pages, renders full-page screenshots and PDF printouts, constructs lightweight block-level ASTs, and packages everything into an upload-ready source bundle complete with audit-ready provenance metadata and cryptographic SHA-256 checksums.
+`web-source-bundler` captures web pages for AI research. It saves clean Markdown, page screenshots, PDFs, and structured block JSON (`ast.json`), packaged into a folder with a manifest and SHA-256 checksums.
 
----
+## Features
 
-## Key Features
-
-- **Multi-Input Support**: Accept direct URLs as command-line arguments, plain text URL files, or search-results JSON files.
-- **Interactive Source Selection**: Review URLs and snippets interactively before fetching, with include/exclude decisions recorded in metadata.
-- **Deterministic Playwright Capture**: Uses headless Chromium with fixed viewport (1365x768), UTC timezone, `en-US` locale, static desktop user-agent, and disabled service workers.
-- **Intelligent Content Extraction**: Cleans boilerplate, navigation, scripts, and non-content elements, targeting main semantic containers and converting content into formatted Markdown.
-- **Upload-Ready Combined Markdown**: Generates a single consolidated `combined.md` file formatted with source headers and citations, perfect for direct upload into AI chat contexts.
-- **Structured Block AST**: Extracts page content into a structured JSON block representation (`ast.json`) for programmatic analysis.
-- **Archival Artifact Preservation**: Stores full-page screenshots (`screenshot.png`), vector PDFs (`page.pdf`), rendered DOM HTML (`rendered.html`), and optional raw HTTP response payloads and headers.
-- **Tamper-Evident Integrity**: Calculates and writes SHA-256 hashes for every artifact to `checksums.sha256` and `manifest.json`.
-- **Local & Secure Execution**: Operates strictly locally with no automated uploads, no credential storage, and no paywall/access-control bypass.
-
----
+- **Multiple inputs**: Direct URLs, text files with URL lists, or search-result JSON files.
+- **Interactive picking**: Pick which URLs to keep before downloading.
+- **Playwright browser capture**: Headless Chromium with fixed viewport (1365x768), UTC time, and no saved cookies.
+- **Clean Markdown extraction**: Strips navigation, scripts, and ads. Targets the main text.
+- **Single combined file**: Outputs `combined.md` formatted for AI chat prompts.
+- **Archival files**: Saves rendered HTML, full-page screenshots, and PDF printouts.
+- **SHA-256 checksums**: Hashes every file for audit checks.
+- **Local only**: Runs on your machine. No remote uploads, credential storage, or paywall bypass.
 
 ## Installation
 
-Ensure you have Python 3.9+ installed.
+Requires Python 3.10+.
 
-1. Clone the repository and install `web-source-bundler` in editable mode:
+1. Install `web-source-bundler`:
    ```bash
    git clone https://github.com/AndrewBrown-USDA/web-source-bundler.git
    cd web-source-bundler
    pip install -e .
    ```
 
-2. Install the required Playwright browser binary (Chromium):
+2. Install the Chromium browser binary:
    ```bash
    python -m playwright install chromium
    ```
 
----
+## CLI Usage
 
-## CLI Commands & Usage
-
-`web-source-bundler` provides three primary subcommands to bundle web content: `urls`, `file`, and `search-results`. (Both `web-source-bundler` and `source-bundler` command aliases are available).
+The CLI provides three subcommands: `urls`, `file`, and `search-results`. Both `web-source-bundler` and `source-bundler` work.
 
 ### 1. Direct URLs
 
-Capture one or more URLs directly from command-line arguments:
+Capture URLs passed as arguments:
 
 ```bash
 web-source-bundler urls https://example.com https://www.gsa.gov --out ./bundle
@@ -50,7 +43,7 @@ web-source-bundler urls https://example.com https://www.gsa.gov --out ./bundle
 
 ### 2. URL List File
 
-Capture URLs listed in a plain text file (one URL per line; blank lines and lines starting with `#` are ignored):
+Capture URLs listed in a text file (one URL per line; lines starting with `#` are ignored):
 
 ```bash
 web-source-bundler file urls.txt --out ./bundle
@@ -66,7 +59,7 @@ https://docs.python.org/3/
 
 ### 3. Search Results JSON
 
-Capture sources from a search results JSON file:
+Capture sources from a search result JSON file:
 
 ```bash
 web-source-bundler search-results results.json --out ./bundle --interactive
@@ -78,7 +71,7 @@ web-source-bundler search-results results.json --out ./bundle --interactive
   {
     "title": "Example Domain",
     "url": "https://example.com",
-    "snippet": "Example domain for illustrative examples in documents."
+    "snippet": "Example domain for illustrative examples."
   },
   {
     "title": "General Services Administration",
@@ -87,65 +80,59 @@ web-source-bundler search-results results.json --out ./bundle --interactive
   }
 ]
 ```
-*(Both `"url"` and `"link"` keys are supported).*
+*(Supports both `"url"` and `"link"` keys).*
 
----
-
-## Command Options & Flags
-
-All subcommands support common configuration flags:
+## Options
 
 | Flag | Description | Default |
 | :--- | :--- | :--- |
-| `--out`, `-o` | Custom output directory path. If omitted, generates `source-bundle-<TIMESTAMP>`. | `None` (auto-generated) |
-| `--interactive`, `-i` | Prompt interactively to confirm (`[Y/n]`) inclusion of each candidate URL. | `False` |
-| `--no-screenshot` | Disable capturing full-page screenshot PNGs. | Screenshots enabled |
-| `--no-pdf` | Disable exporting pages as PDF documents. | PDF export enabled |
-| `--include-raw-html` | Capture raw HTTP response body (`raw.html`) and HTTP response headers (`response_headers.json`). | `False` |
-| `--include-links-table` | Append a Markdown table of all extracted outbound hyperlinks to `readable.md`. | `False` |
-| `--redact-pattern <REGEX>` | Redact matching regex patterns (e.g. emails, tokens) from extracted Markdown (`[REDACTED]`). Can be passed multiple times. | `None` |
-| `--timeout <SECONDS>` | Page navigation and rendering timeout in seconds. | `30` |
-| `--version`, `-v` | Display tool version and exit. | — |
+| `--out`, `-o` | Output directory path. | `source-bundle-<TIMESTAMP>` |
+| `--interactive`, `-i` | Prompt (`[Y/n]`) for each URL. | Off |
+| `--no-screenshot` | Skip PNG screenshot. | Saves screenshot |
+| `--no-pdf` | Skip PDF printout. | Saves PDF |
+| `--include-raw-html` | Save raw HTTP body (`raw.html`) and headers (`response_headers.json`). | Off |
+| `--include-links-table` | Append a table of outbound links to `readable.md`. | Off |
+| `--redact-pattern <REGEX>` | Replace matching regex with `[REDACTED]`. Can repeat. | None |
+| `--timeout <SECONDS>` | Page load timeout in seconds. | `30` |
+| `--version`, `-v` | Show version and exit. | — |
 
-### Example with Advanced Flags
+### Example
 
 ```bash
 web-source-bundler urls https://example.com \
-  --out ./my-research-bundle \
+  --out ./my-bundle \
   --no-pdf \
   --include-links-table \
   --redact-pattern "(\d{3}-\d{2}-\d{4})" \
   --timeout 45
 ```
 
----
+## Output Structure
 
-## Output Directory & Artifact Structure
-
-When execution completes, `web-source-bundler` creates a self-contained bundle directory containing consolidated research files, checksums, and per-source archival artifacts:
+The output folder contains:
 
 ```text
 source-bundle-20260918T153000Z/
-├── manifest.json              # Complete machine-readable provenance & audit log
-├── combined.md                # Consolidated upload-ready reference Markdown for AI chat
-├── checksums.sha256           # Cryptographic SHA-256 hashes of all artifacts
+├── manifest.json              # Provenance metadata and error logs
+├── combined.md                # Reference Markdown file for AI chat
+├── checksums.sha256           # SHA-256 hashes of all files
 └── sources/
     ├── 001/
-    │   ├── metadata.json      # Per-source capture metadata, HTTP status, and timings
-    │   ├── rendered.html      # Fully rendered DOM HTML after JavaScript execution
-    │   ├── readable.md        # Extracted main content in Markdown with YAML front matter
-    │   ├── ast.json           # Structured block-level AST of extracted content
-    │   ├── screenshot.png     # Full-page screenshot (if enabled)
-    │   ├── page.pdf           # Vector PDF printout (if enabled)
-    │   ├── raw.html           # Raw HTTP response body (if --include-raw-html)
-    │   └── response_headers.json # HTTP response headers (if --include-raw-html)
+    │   ├── metadata.json      # Source metadata, HTTP status, and timings
+    │   ├── rendered.html      # Rendered DOM HTML
+    │   ├── readable.md        # Extracted Markdown with YAML front matter
+    │   ├── ast.json           # Block AST of extracted text
+    │   ├── screenshot.png     # Full-page screenshot
+    │   ├── page.pdf           # Vector PDF printout
+    │   ├── raw.html           # Raw HTTP body (with --include-raw-html)
+    │   └── response_headers.json # HTTP headers (with --include-raw-html)
     └── 002/
         └── ...
 ```
 
-### Combined Markdown Format (`combined.md`)
+### Combined Markdown (`combined.md`)
 
-The `combined.md` file is tailored specifically for LLM context windows, providing a clean citation structure:
+`combined.md` joins all sources into one document for AI prompts:
 
 ```markdown
 # Source Bundle
@@ -169,56 +156,29 @@ Use this document as the reference source bundle. Cite material by source ID.
 
 Example Domain
 
-This domain is for use in illustrative examples in documents. You may use this domain in literature without prior coordination or asking for permission.
+This domain is for use in illustrative examples in documents.
 ```
 
----
+## Content Extraction
 
-## Content Extraction Pipeline & Tradeoffs
+1. **DOM fetch**: Playwright loads the page, waits for network idle, and reads `page.content()`.
+2. **Noise removal**: Drops `<script>`, `<style>`, `<noscript>`, `<svg>`, `<canvas>`, `<nav>`, `<footer>`, `<header>`, and cookie banners.
+3. **Main container search**: Looks for `<main>`, `<article>`, `[role="main"]`, `#content`, or `.content`. Falls back to `<body>`.
+4. **Markdown conversion**: Uses `markdownify` to convert HTML to Markdown. Keeps headings, lists, tables, code blocks, and links.
+5. **AST generation**: Traverses the cleaned DOM to build block objects in `ast.json`.
+6. **Redactions & links**: Applies regex redactions and optionally appends a link table.
 
-`web-source-bundler` implements a pragmatic, robust content extraction pipeline designed to maximize text fidelity while stripping distracting web clutter:
+## Security
 
-1. **DOM Capture**: Playwright loads the page, waits for `domcontentloaded` and network idle stabilization, and retrieves the live DOM HTML (`page.content()`).
-2. **Boilerplate & Noise Removal**: Non-content elements are removed (`<script>`, `<style>`, `<noscript>`, `<svg>`, `<canvas>`, `<nav>`, `<footer>`, `<header>`, cookie banners, and dialog elements).
-3. **Semantic Container Targeting**: Content extraction prioritizes semantic main content nodes (`<main>`, `<article>`, `[role="main"]`, `#content`, `.content`, `.main`). If none are found, extraction falls back safely to `<body>`.
-4. **Markdown Conversion**: Uses `markdownify` with fine-tuned heading styles (`ATX`), robust table preservation, fenced code blocks, and link preservation.
-5. **Structured AST Generation**: Traverses the cleaned DOM hierarchy to build a block-level AST (`heading`, `paragraph`, `code_block`, `blockquote`, `list`, `table`, `link`) saved to `ast.json`.
-6. **Redaction & Link Indexing**: Optional regex redactions are applied across Markdown content, and an optional outbound links reference table can be appended.
-
-### Tradeoffs
-- **Heuristic Content Isolation vs. Readability Engines**: Rather than relying strictly on heavy algorithmic readability models that may discard custom data tables or technical documentation sidebars, `web-source-bundler` combines semantic container heuristics with DOM hygiene to preserve complex structures like code blocks and tables.
-- **Client-Side Rendering**: Headless Chromium execution ensures modern single-page applications (SPAs) render completely, at the cost of higher CPU/memory overhead compared to static HTTP requests.
-
----
-
-## Provenance & Records Review
-
-`web-source-bundler` is designed to meet strict provenance and auditability standards for research reproducibility:
-
-- **Deterministic Browser Environment**:
-  - Viewport: Fixed at `1365x768`
-  - Locale: `en-US`
-  - Timezone: `UTC`
-  - User-Agent: Static desktop user agent
-  - Isolation: Transient browser contexts with service workers disabled and no cookie persistence across runs.
-- **Cryptographic Verification**: Every output file is hashed using SHA-256. Hashes are recorded in `checksums.sha256` and mapped to corresponding source records in `manifest.json`.
-- **Comprehensive Manifest**: `manifest.json` provides an end-to-end record of the execution, including the capture configuration, tool version, ISO-8601 UTC timestamps, HTTP status codes, final resolved URLs (tracking redirects), user selection notes, artifact paths, and non-fatal error traces.
-
----
-
-## Security & Access Control Considerations
-
-- **Browser Sandboxing**: Playwright operates in standard sandboxed browser processes. Do not disable sandboxing or execute the CLI with root/administrator privileges.
-- **Untrusted Content Handling**: All fetched web assets are treated as untrusted data. DOM HTML is sanitized and converted to static Markdown before being passed to downstream AI workflows.
-- **No Credential Access**: The tool does not store, request, or transmit credentials, session tokens, or authentication cookies.
-- **No Automatic Remote Transmissions**: The tool is strictly a local capture and packaging utility. It does not perform automated uploads to any external AI service or third-party server.
-- **Ethical Web Ingestion**: `web-source-bundler` does not attempt to circumvent CAPTCHAs, paywalls, or access controls.
-
----
+- **Sandboxing**: Playwright runs in a sandbox. Do not run as root or administrator.
+- **Untrusted input**: Web content is treated as untrusted data and converted to static Markdown.
+- **No credentials**: The tool does not store or send passwords, tokens, or cookies.
+- **Local only**: No data is sent to external servers.
+- **Access limits**: Does not bypass paywalls or access controls.
 
 ## Running Tests
 
-Run the comprehensive unit test suite using `pytest`:
+Run tests with `pytest`:
 
 ```bash
 python -m pytest -v

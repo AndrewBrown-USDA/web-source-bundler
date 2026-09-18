@@ -47,9 +47,9 @@ async def capture_url(
 ) -> CaptureResult:
     """Capture a URL asynchronously using headless Chromium via Playwright.
 
-    Executes deterministic rendering, extracts final URL, title, HTTP response metadata,
-    rendered DOM HTML, screenshot, PDF printout, and optional raw response HTML.
-    All errors are caught gracefully and recorded in CaptureResult.errors.
+    Renders the page, extracts final URL, title, HTTP status,
+    DOM HTML, screenshot, PDF printout, and optional raw response HTML.
+    Records errors in CaptureResult.errors.
     """
     if config is None:
         config = _get_default_config()
