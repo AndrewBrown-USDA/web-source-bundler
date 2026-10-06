@@ -1,6 +1,6 @@
 # web-source-bundler
 
-`web-source-bundler` captures web pages for AI research. It saves clean Markdown, page screenshots, PDFs, and structured block JSON (`ast.json`), packaged into a folder with a manifest and SHA-256 checksums.
+`web-source-bundler` captures web pages for agentic research. It saves clean Markdown, page screenshots, PDFs, and structured block JSON (`ast.json`), packaged into a folder with a manifest and SHA-256 checksums.
 
 ## Features
 
@@ -8,7 +8,7 @@
 - **Interactive picking**: Pick which URLs to keep before downloading.
 - **Playwright browser capture**: Headless Chromium with fixed viewport (1365x768), UTC time, and no saved cookies.
 - **Clean Markdown extraction**: Strips navigation, scripts, and ads. Targets the main text.
-- **Single combined file**: Outputs `combined.md` formatted for AI chat prompts.
+- **Single combined file**: Outputs `combined.md` formatted for agent chat prompts.
 - **Archival files**: Saves rendered HTML, full-page screenshots, and PDF printouts.
 - **SHA-256 checksums**: Hashes every file for audit checks.
 - **Local only**: Runs on your machine. No remote uploads, credential storage, or paywall bypass.
@@ -114,7 +114,7 @@ The output folder contains:
 ```text
 source-bundle-20260918T153000Z/
 ├── manifest.json              # Provenance metadata and error logs
-├── combined.md                # Reference Markdown file for AI chat
+├── combined.md                # Reference Markdown file for agent chat
 ├── checksums.sha256           # SHA-256 hashes of all files
 └── sources/
     ├── 001/
@@ -132,7 +132,7 @@ source-bundle-20260918T153000Z/
 
 ### Combined Markdown (`combined.md`)
 
-`combined.md` joins all sources into one document for AI prompts:
+`combined.md` joins all sources into one document for agent prompts:
 
 ```markdown
 # Source Bundle
